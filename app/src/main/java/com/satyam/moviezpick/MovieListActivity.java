@@ -1,6 +1,8 @@
 package com.satyam.moviezpick;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import com.satyam.moviezpick.request.Servicey;
 import com.satyam.moviezpick.response.MovieSearchResponse;
 import com.satyam.moviezpick.utils.Credentials;
 import com.satyam.moviezpick.utils.MovieApi;
+import com.satyam.moviezpick.viewmodels.MovieListViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +26,28 @@ import retrofit2.Response;
 
 public class MovieListActivity extends AppCompatActivity {
     Button button;
+    //View Model
+    private MovieListViewModel movieListViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         button = findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
+        movieListViewModel =new ViewModelProvider(this).get(MovieListViewModel.class);
+
+    }
+    private void observeAnyChange(){
+        movieListViewModel.getMovies().observe(this, new Observer<List<MovieModel>>() {
             @Override
-            public void onClick(View view) {
-                GetRetrofitResponse();
+            public void onChanged(List<MovieModel> movieModels) {
+                //Observing for Any Data change
             }
         });
     }
+
+
+
 
     private void GetRetrofitResponse() {
         MovieApi movieApi = Servicey.getMovieApi();
@@ -62,6 +74,31 @@ public class MovieListActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<MovieSearchResponse> call, Throwable t) {
                 Toast.makeText(MovieListActivity.this,"Something went wrong",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void GetRetrofitResponseAccordingToId(){
+        MovieApi movieApi = Servicey.getMovieApi();
+        Call<MovieModel> responseCall=movieApi.getMovie(
+                550,
+                Credentials.Api_key
+        );
+        responseCall.enqueue(new Callback<MovieModel>() {
+            @Override
+            public void onResponse(Call<MovieModel> call, Response<MovieModel> response) {
+                if(response.code()==200){
+                    MovieModel movie=response.body();
+                    Log.v("pra","Movie Poster: "+movie.getTitle());
+                }
+                else {
+                    Log.v("pra", "Error Message" + response.errorBody().toString());
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<MovieModel> call, Throwable t) {
+
             }
         });
     }
