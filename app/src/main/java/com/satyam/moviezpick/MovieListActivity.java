@@ -35,6 +35,13 @@ public class MovieListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         button = findViewById(R.id.button);
         movieListViewModel =new ViewModelProvider(this).get(MovieListViewModel.class);
+        observeAnyChange();
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchMovieApi("Fast",10);
+            }
+        });
 
     }
     private void observeAnyChange(){
@@ -42,12 +49,21 @@ public class MovieListActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<MovieModel> movieModels) {
                 //Observing for Any Data change
+                if(movieModels!=null){
+                    for (MovieModel movieModel:movieModels){
+                        //get the data in log
+                        Log.v("tagy","on changed: "+movieModel.getTitle());
+                    }
+                }
             }
         });
     }
 
+    //calling method in Main Activity
 
-
+    public void searchMovieApi(String query, int pageNumber) {
+            movieListViewModel.searchMovieApi(query, pageNumber);
+    }
 
     private void GetRetrofitResponse() {
         MovieApi movieApi = Servicey.getMovieApi();

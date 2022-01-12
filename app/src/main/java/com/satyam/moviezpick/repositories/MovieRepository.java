@@ -18,11 +18,16 @@ public class MovieRepository {
         }
         return instance;
     }
-    private MovieRepository(){
+
+    private MovieRepository() {
         movieApiClient = MovieApiClient.getInstance();
     }
 
     public MutableLiveData<List<MovieModel>> getMovies() {
         return movieApiClient.getMovies();
+    }
+
+    public void searchMovieApi(String query, int pageNumber) {
+        movieApiClient.searchMovieApi(query, pageNumber);
     }
 }
