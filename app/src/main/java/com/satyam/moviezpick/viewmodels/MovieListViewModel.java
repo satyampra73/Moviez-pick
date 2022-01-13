@@ -12,13 +12,17 @@ import java.util.List;
 public class MovieListViewModel extends ViewModel {
     //this class is used for View Model
     MovieRepository movieRepository;
+
     public MovieListViewModel() {
-       movieRepository=MovieRepository.getInstance();
+        movieRepository = MovieRepository.getInstance();
     }
-    public LiveData<List<MovieModel>> getMovies(){
+
+    public LiveData<List<MovieModel>> getMovies() {
         return movieRepository.getMovies();
     }
+
     public void searchMovieApi(String query, int pageNumber) {
         movieRepository.searchMovieApi(query, pageNumber);
     }
+
 }

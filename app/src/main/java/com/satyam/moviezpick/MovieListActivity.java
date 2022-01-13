@@ -1,6 +1,9 @@
 package com.satyam.moviezpick;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,6 +32,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieListActivity extends AppCompatActivity implements OnMovieListener {
+    Toolbar toolbar;
     private RecyclerView recyclerView;
     //View Model
     private MovieListViewModel movieListViewModel;
@@ -38,11 +42,15 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        toolbar=findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        setUpSearchView();
         recyclerView = findViewById(R.id.recyclerView);
         movieListViewModel = new ViewModelProvider(this).get(MovieListViewModel.class);
         ConfigureRecyclerView();
         observeAnyChange();
-        searchMovieApi("iron",1);
+
+
 
 //        button.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -51,6 +59,25 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
 //            }
 //        });
 
+    }
+
+    private void setUpSearchView() {
+        final SearchView searchView=findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                movieListViewModel.searchMovieApi(
+                        query,
+                        1
+                );
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     private void observeAnyChange() {
@@ -71,9 +98,6 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
 
     //calling method in Main Activity
 
-    public void searchMovieApi(String query, int pageNumber) {
-        movieListViewModel.searchMovieApi(query, pageNumber);
-    }
 
     private void GetRetrofitResponse() {
         MovieApi movieApi = Servicey.getMovieApi();
@@ -133,11 +157,14 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
         movieRecyclerAdapter = new MovieRecyclerView(this);
         recyclerView.setAdapter(movieRecyclerAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
+
     }
 
     @Override
     public void onMovieClick(int position) {
-
+        Toast.makeText(this, "position: "+position, Toast.LENGTH_SHORT).show();
     }
 
     @Override

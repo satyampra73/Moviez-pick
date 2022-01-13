@@ -30,4 +30,5 @@ public class MovieRepository {
     public void searchMovieApi(String query, int pageNumber) {
         movieApiClient.searchMovieApi(query, pageNumber);
     }
+
 }
