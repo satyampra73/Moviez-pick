@@ -7,18 +7,29 @@
     android:orientation="vertical"
     tools:context=".MovieListActivity">
 
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#A55CED"
+        android:text="Pick your Best"
+        android:textSize="45sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginTop="55dp"/>
+
+
     <androidx.appcompat.widget.Toolbar
         android:layout_width="wrap_content"
         android:layout_height="?attr/actionBarSize"
         android:id="@+id/toolbar"
+        android:layout_marginTop="50dp"
         app:layout_scrollFlags="scroll|enterAlways"
-        android:background="#FAF7CB"
         >
         <androidx.appcompat.widget.SearchView
             android:layout_width="wrap_content"
             android:layout_height="?attr/actionBarSize"
             android:id="@+id/searchView"
-            android:background="#FAF7CB"
             app:queryHint="Movie name?"/>
 
     </androidx.appcompat.widget.Toolbar>
@@ -28,6 +39,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="378dp"
         android:layout_height="767dp"
+        android:layout_marginTop="30dp"
         android:layout_marginLeft="5dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         />

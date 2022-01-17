@@ -26,4 +26,14 @@ public interface MovieApi {
 
             @Query("api_key") String api_key
     );
+
+    //Get popular movies
+    //https://api.themoviedb.org /3/movie/popular ?api_key=39c4a7edf1c085ac2385ce2e31cb8bbd&page=2
+    @GET("/3/movie/popular")
+    Call<MovieSearchResponse> getPopular(
+            @Query("api_key") String key,
+            @Query("page") int page
+    );
+
+
 }

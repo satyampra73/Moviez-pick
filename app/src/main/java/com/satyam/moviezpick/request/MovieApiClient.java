@@ -23,9 +23,13 @@ public class MovieApiClient {
     private static MovieApiClient instance;
     //Making global Runnable
     private RetrieveMoviesRunnable retrieveMoviesRunnable;
+    //Live data for populer
+    private MutableLiveData<List<MovieModel>> mMoviesPop;
+    private RetrieveMoviesRunnablePop retrieveMoviesRunnablePop;
 
 
     public static MovieApiClient getInstance() {
+
         if (instance==null){
             instance=new MovieApiClient();
         }
@@ -34,10 +38,15 @@ public class MovieApiClient {
 
     private MovieApiClient() {
         mMovies=new MutableLiveData<>();
+        mMoviesPop=new MutableLiveData<>();
     }
 
     public MutableLiveData<List<MovieModel>> getMovies() {
         return mMovies;
+    }
+
+    public MutableLiveData<List<MovieModel>> getMoviesPop() {
+        return mMoviesPop;
     }
 
     //This method will going to be called as step in classes
@@ -47,6 +56,23 @@ public class MovieApiClient {
         }
         retrieveMoviesRunnable=new RetrieveMoviesRunnable(query,pageNumber);
         final Future myHandler= AppExecuters.getInstance().networkIO().submit(retrieveMoviesRunnable);
+
+        AppExecuters.getInstance().networkIO().schedule(new Runnable() {
+            @Override
+            public void run() {
+                //cancelling for retrofit call
+                myHandler.cancel(true);
+            }
+        },3000,TimeUnit.MILLISECONDS);
+    }
+
+    //Get Pop
+    public void searchMovieApiPop( int pageNumber){
+        if(retrieveMoviesRunnablePop!=null){
+            retrieveMoviesRunnablePop=null;
+        }
+     retrieveMoviesRunnablePop=new RetrieveMoviesRunnablePop(pageNumber);
+        final Future myHandler= AppExecuters.getInstance().networkIO().submit(retrieveMoviesRunnablePop);
 
         AppExecuters.getInstance().networkIO().schedule(new Runnable() {
             @Override
@@ -110,6 +136,66 @@ public class MovieApiClient {
             return Servicey.getMovieApi().searchMovie(
                     Credentials.Api_key,
                     query,
+                    pageNumber
+            );
+        }
+
+        private void cancelRequest(){
+            Log.v("pra","Cancelling Request");
+            cancelRequest=true;
+        }
+
+    }
+
+    private class RetrieveMoviesRunnablePop implements Runnable{
+
+        private final int pageNumber;
+        boolean cancelRequest;
+
+        public RetrieveMoviesRunnablePop(int pageNumber) {
+            this.pageNumber = pageNumber;
+            cancelRequest = false;
+        }
+
+
+        @Override
+        public void run() {
+            //Getting the response objects
+
+            try {
+                Response response=getMoviesPop(pageNumber).execute();
+                if (cancelRequest){
+                    return;
+                }
+
+                if(response.code()==200){
+                    List<MovieModel> list=new ArrayList<>(((MovieSearchResponse)response.body()).getMovies());
+                    if(pageNumber != 0){
+                        //sending data to live data
+                        //post value:used for background thread
+                        mMoviesPop.postValue(list);
+                    }
+                    else {
+                        List<MovieModel> currentMovies=mMoviesPop.getValue();
+                        currentMovies.addAll(list);
+                        mMoviesPop.postValue(currentMovies);
+                    }
+                }
+                else {
+                    String error=response.errorBody().toString();
+                    Log.e("pra","error is: "+error);
+                    mMoviesPop.postValue(null);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                mMoviesPop.postValue(null);
+            }
+
+
+        }
+        private Call<MovieSearchResponse> getMoviesPop(int pageNumber){
+            return Servicey.getMovieApi().getPopular(
+                    Credentials.Api_key,
                     pageNumber
             );
         }

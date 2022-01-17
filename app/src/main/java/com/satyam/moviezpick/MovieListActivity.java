@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.satyam.moviezpick.adapters.MovieRecyclerView;
@@ -38,6 +39,7 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
     //View Model
     private MovieListViewModel movieListViewModel;
     private MovieRecyclerView movieRecyclerAdapter;
+    boolean isPopular=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,17 +52,12 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
         movieListViewModel = new ViewModelProvider(this).get(MovieListViewModel.class);
         ConfigureRecyclerView();
         observeAnyChange();
+        observePopularMovies();
+        movieListViewModel.searchMovieApiPop(1);
 
-
-
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                searchMovieApi("Fast",10);
-//            }
-//        });
 
     }
+
 
     private void setUpSearchView() {
         final SearchView searchView=findViewById(R.id.searchView);
@@ -77,6 +74,29 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
             @Override
             public boolean onQueryTextChange(String newText) {
                 return false;
+            }
+        });
+
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                isPopular=false;
+            }
+        });
+    }
+
+    private void observePopularMovies() {
+        movieListViewModel.getMoviesPop().observe(this, new Observer<List<MovieModel>>() {
+            @Override
+            public void onChanged(List<MovieModel> movieModels) {
+                //Observing for Any Data change
+                if (movieModels != null) {
+                    for (MovieModel movieModel : movieModels) {
+                        //get the data in log
+                        Log.v("tagy", "on changed: " + movieModel.getTitle());
+                        movieRecyclerAdapter.setmMovies(movieModels);
+                    }
+                }
             }
         });
     }
@@ -157,7 +177,7 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
     private void ConfigureRecyclerView() {
         movieRecyclerAdapter = new MovieRecyclerView(this);
         recyclerView.setAdapter(movieRecyclerAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false));
 
 
 
@@ -175,4 +195,6 @@ public class MovieListActivity extends AppCompatActivity implements OnMovieListe
     public void onCategoryClick(String category) {
 
     }
+
+
 }
